@@ -21,7 +21,7 @@ export const useVapi = () => {
   const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
 
   useEffect(() => {
-    const vapiInstance = new Vapi("b649f248-d4e2-4a46-b835-51c0338f4e2f");
+    const vapiInstance = new Vapi("");
     vapiRef.current = vapiInstance;
 
     vapiInstance.on("call-start", () => {
@@ -74,7 +74,7 @@ export const useVapi = () => {
   const startCall = () => {
     if (vapiRef.current) {
       setIsConnecting(true);
-      vapiRef.current.start("1fa9a5ec-9b79-4cf7-bfcb-ac45802c85b7");
+      vapiRef.current.start("");
     } else {
       console.error("Cannot start call: Vapi instance not initialized");
       setIsConnecting(false);
