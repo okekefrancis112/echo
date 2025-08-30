@@ -6,10 +6,10 @@ import { DashboardSidebar } from "../components/dashboard-sidebar";
 
 export const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
     const cookieStore =  await cookies();
-    const sidebarState = cookieStore.get("sidebar_state");
-    // const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+    const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+    // const sidebarState = cookieStore.get("sidebar_state");
     // Default to true if cookie doesn't exist, otherwise use the cookie value
-    const defaultOpen = sidebarState?.value === "false" ? false : true;
+    // const defaultOpen = sidebarState?.value === "false" ? false : true;
     return (
         <AuthGuard>
             <OrganizationGuard>
