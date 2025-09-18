@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as public_contactSessions from "../public/contactSessions.js";
+import type * as public_organizations from "../public/organizations.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -25,6 +26,7 @@ import type * as public_contactSessions from "../public/contactSessions.js";
  */
 declare const fullApi: ApiFromModules<{
   "public/contactSessions": typeof public_contactSessions;
+  "public/organizations": typeof public_organizations;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
