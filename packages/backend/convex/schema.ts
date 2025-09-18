@@ -2,8 +2,24 @@ import { time } from "console";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { platform } from "os";
+import { threadId } from "worker_threads";
 
 export default defineSchema({
+    conversations: defineTable({
+        threadId: v.string(),
+        organisationId: v.string(),
+        contactSessionId: v.id("contactSessions"),
+        status: v.union(
+            v.literal("unresolved"),
+            v.literal("escalated"),
+            v.literal("resolved")
+        ),
+    })
+        .index("by_organization_id", ["organisationId"])
+        .index("by_contact_session_id", ["contactSessionId"])
+        .index("by_thread_id", ["threadId"])
+        .index("by_status_and_organization_id", ["status", "organisationId"]),
+
     contactSessions: defineTable({
         name: v.string(),
         email: v.string(),
