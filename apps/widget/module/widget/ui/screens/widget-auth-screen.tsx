@@ -7,18 +7,18 @@ import { Button } from "@workspace/ui/components/button"
 import { useMutation } from "convex/react"
 import { api } from "@workspace/backend/_generated/api"
 import { Doc } from "@workspace/backend/_generated/dataModel"
-import { contactSessionIdAtomFamily, organizationIdAtom } from "../../atoms/widget-atoms"
+import { contactSessionIdAtomFamily, organizationIdAtom, screenAtom } from "../../atoms/widget-atoms"
 import { useAtomValue, useSetAtom } from "jotai"
+import { set } from "zod/v4-mini"
 
 const formSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),
     email: z.string().email("Invalid email address"),
 })
 
-// Temporary test organization ID, before we add state management
-const organizationId = "123";
-
 export const WidgetAuthScreen = () => {
+    const setScreen = useSetAtom(screenAtom);
+
     const organizationId = useAtomValue(organizationIdAtom);
     const setContactSessionId = useSetAtom(
         contactSessionIdAtomFamily(organizationId || "")
@@ -62,6 +62,7 @@ export const WidgetAuthScreen = () => {
 
         console.log("Created contact session with ID:", contactSessionId);
         setContactSessionId(contactSessionId)
+        setScreen("selection");
     }
 
     return (
