@@ -6,7 +6,6 @@ import { WidgetHeader } from "../components/widget-header";
 import { AlertTriangleIcon, ArrowLeftIcon } from "lucide-react";
 import { WidgetFooter } from "../components/widget-footer";
 import { Button } from "@workspace/ui/components/button";
-import { set } from "zod/v4-mini";
 import { usePaginatedQuery, useQuery } from "convex/react";
 import { api } from "@workspace/backend/_generated/api";
 import { ConversationStatusIcon } from "@workspace/ui/components/conversation-status-icon";
