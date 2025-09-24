@@ -1,25 +1,27 @@
 "use client";
 
+import { formatDistanceToNow } from "date-fns";
 import { useAtomValue, useSetAtom } from "jotai";
-import { contactSessionIdAtomFamily, conversationIdAtom, errorMessageAtom, organizationIdAtom, screenAtom } from "../../atoms/widget-atoms";
+import { contactSessionIdAtomFamily, conversationIdAtom, organizationIdAtom, screenAtom } from "../../atoms/widget-atoms";
 import { WidgetHeader } from "../components/widget-header";
-import { AlertTriangleIcon, ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { WidgetFooter } from "../components/widget-footer";
 import { Button } from "@workspace/ui/components/button";
-import { usePaginatedQuery, useQuery } from "convex/react";
+import { usePaginatedQuery } from "convex/react";
 import { api } from "@workspace/backend/_generated/api";
 import { ConversationStatusIcon } from "@workspace/ui/components/conversation-status-icon";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/infinite-scroll-trigger";
 
+
 export const WidgetInboxScreen = () => {
     const setScreen = useSetAtom(screenAtom);
     const setConversationId = useSetAtom(conversationIdAtom);
 
-        const organisationId = useAtomValue(organizationIdAtom);
+        const organizationId = useAtomValue(organizationIdAtom);
         const conversationId = useAtomValue(conversationIdAtom);
         const contactSessionId = useAtomValue(
-            contactSessionIdAtomFamily(organisationId || "")
+            contactSessionIdAtomFamily(organizationId || "")
         );
 
         const conversations = usePaginatedQuery(
@@ -34,15 +36,16 @@ export const WidgetInboxScreen = () => {
             },
         );
 
-    function formatDistanceToNow(arg0: Date): import("react").ReactNode {
-        throw new Error("Function not implemented.");
-    }
-
-    const { topElementRef, handleLoadMore, canLoadMore, isLoadingMore } = useInfiniteScroll({
-            status: conversations.status,
-            loadMore: conversations.loadMore,
-            loadSize: 10,
-        });
+    const {
+        topElementRef,
+        handleLoadMore,
+        canLoadMore,
+        isLoadingMore
+    } = useInfiniteScroll({
+        status: conversations.status,
+        loadMore: conversations.loadMore,
+        loadSize: 10,
+    });
 
     return (
         <>
