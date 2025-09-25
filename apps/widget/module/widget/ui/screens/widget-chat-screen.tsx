@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,10 +27,10 @@ export const WidgetChatScreen = () => {
     const setScreen = useSetAtom(screenAtom);
     const setConversationId = useSetAtom(conversationIdAtom);
 
-    const organisationId = useAtomValue(organizationIdAtom);
+    const organizationId = useAtomValue(organizationIdAtom);
     const conversationId = useAtomValue(conversationIdAtom);
     const contactSessionId = useAtomValue(
-        contactSessionIdAtomFamily(organisationId || "")
+        contactSessionIdAtomFamily(organizationId || "")
     );
 
     const onBack = () => {

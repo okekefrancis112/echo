@@ -41,7 +41,7 @@ export const WidgetSelectionScreen = () => {
         try {
             const conversationId = await createConversation({
                 contactSessionId,
-                organisationId: organizationId,
+                organizationId: organizationId,
             });
 
             setConversationId(conversationId);

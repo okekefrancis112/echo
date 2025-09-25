@@ -45,7 +45,7 @@ export const getMany = query({
                     _id: conversation._id,
                     _creationTime: conversation._creationTime,
                     status: conversation.status,
-                    organisationId: conversation.organisationId,
+                    organizationId: conversation.organizationId,
                     threadId: conversation.threadId,
                     lastMessage,
                 };
@@ -100,7 +100,7 @@ export const getOne = query({
 
 export const create = mutation({
     args: {
-        organisationId: v.string(),
+        organizationId: v.string(),
         contactSessionId: v.id("contactSessions"),
     },
     handler: async (ctx, args) => {
@@ -129,7 +129,7 @@ export const create = mutation({
         const conversationId = await ctx.db.insert("conversations", {
             contactSessionId: session._id,
             status: "unresolved",
-            organisationId: args.organisationId,
+            organizationId: args.organizationId,
             threadId,
         })
 
