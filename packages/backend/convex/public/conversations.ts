@@ -18,7 +18,7 @@ export const getMany = query({
                 code: "UNAUTHORIZED",
                 message: "Invalid session",
             });
-            }
+        };
 
         const conversations = await ctx.db
             .query("conversations")
@@ -72,7 +72,7 @@ export const getOne = query({
                 code: "UNAUTHORIZED",
                 message: "Invalid session",
             });
-        }
+        };
 
         const conversation = await ctx.db.get(args.conversationId);
 
@@ -81,21 +81,21 @@ export const getOne = query({
                 code: "NOT_FOUND",
                 message: "Conversation not found",
             });
-        }
+        };
 
         if (conversation.contactSessionId !== session._id) {
             throw new ConvexError({
                 code: "UNAUTHORIZED",
                 message: "Incorrect session",
             });
-        }
+        };
 
         return {
             _id: conversation._id,
             status: conversation.status,
             threadId: conversation.threadId,
-        }
-    }
+        };
+    },
 });
 
 export const create = mutation({
@@ -111,11 +111,11 @@ export const create = mutation({
                 code: "UNAUTHORIZED",
                 message: "Invalid session",
             });
-        }
+        };
 
         const { threadId } = await supportAgent.createThread(ctx, {
             userId: args.contactSessionId,
-        })
+        });
 
         await saveMessage(ctx, components.agent, {
             threadId,
@@ -124,14 +124,14 @@ export const create = mutation({
                 // TODO: Later modify to widget settings' initial message
                 content: "Hello, how can I help you today?",
             }
-        })
+        });
 
         const conversationId = await ctx.db.insert("conversations", {
             contactSessionId: session._id,
             status: "unresolved",
             organizationId: args.organizationId,
             threadId,
-        })
+        });
 
         return conversationId;
     },

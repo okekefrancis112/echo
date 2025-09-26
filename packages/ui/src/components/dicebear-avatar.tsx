@@ -33,7 +33,9 @@ export const DicebearAvatar = ({
             size,
             // radius: 50,
             // backgroundColor: ["transparent"],
-        }).toDataUri();
+        });
+
+        return avatar.toDataUri();
     }, [seed, size, imageUrl]);
 
     const badgeSize = Math.round(size * 0.5);
@@ -46,7 +48,7 @@ export const DicebearAvatar = ({
                 className={cn("border", className)}
                 style={{ width: size, height: size }}
             >
-                <AvatarImage alt="Image" src={avatarSrc} />
+                <AvatarImage alt="Avatar" src={avatarSrc} />
             </Avatar>
             {badgeImageUrl && (
                 <div
