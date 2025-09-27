@@ -1,14 +1,15 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { getCountryFlagUrl, getCountryFromTimezone } from "@/lib/country-utils";
-import { api } from "@workspace/backend/_generated/api";
+// import { getCountryFlagUrl, getCountryFromTimezone } from "@/lib/country-utils";
+import { getCountryFlagUrl, getCountryFromTimezone } from "../../../../lib/country-utils";
+// import { api } from "@workspace/backend/_generated/api";
 import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { ScrollArea } from "@workspace/ui/components/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import { cn } from "@workspace/ui/lib/utils";
 import { usePaginatedQuery } from "convex/react";
-import { ArrowRightIcon, ArrowUpIcon, CheckIcon, CornerUpLeftIcon, Link, ListIcon } from "lucide-react";
+import { ArrowRightIcon, ArrowUpIcon, CheckIcon, CornerUpLeftIcon, ListIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { ConversationStatusIcon } from "@workspace/ui/components/conversation-status-icon";
 import { statusFilterAtom } from "../../atoms";
@@ -16,6 +17,8 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/infinite-scroll-trigger";
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import { api } from "../../../../../../packages/backend/convex/_generated/api";
+import Link from "next/link";
 
 export const ConversationsPanel = () => {
     const pathname = usePathname();
@@ -95,7 +98,8 @@ export const ConversationsPanel = () => {
                 <SkeletonConversations />
             ): (
                 <ScrollArea className="max-h-[calc(100vh-53px)]">
-                    <div className="flex w-full flex-col flex-1 text-sm">
+                    {/* {JSON.stringify(conversations)} */}
+                    <div className="flex w-full flex-1 flex-col text-sm">
                         {conversations.results.map((conversation) => {
                             const isLastMessageFromOperator = conversation.lastMessage?.message?.role !== "user";
 
@@ -109,12 +113,16 @@ export const ConversationsPanel = () => {
                                 <Link
                                     key={conversation._id}
                                     className={cn(
-                                        "relative flex cursor-pointer items-start gap-3 border-b p-4 py-5 text-sm leading-tight hover:bg-accent hover:text-accent-foreground"
+                                        "relative flex cursor-pointer items-start gap-3 border-b p-4 py-5 text-sm leading-tight hover:bg-accent hover:text-accent-foreground",
+                                        pathname === `/conversations/${conversation._id}` &&
+                                            "bg-accent text-accent-foreground"
                                     )}
                                     href={`/conversations/${conversation._id}`}
                                 >
-                                    <div className={cn("-translate-y-1/2 absolute top-1/2 left-0 h-[64%] w-1 rounded-r-full bg-neutral-300 opacity-0 transition-opacity",
-                                        pathname === `/conversations/${conversation._id}` && "opacity-100"
+                                    <div className={cn(
+                                        "-translate-y-1/2 absolute top-1/2 left-0 h-[64%] w-1 rounded-r-full bg-neutral-300 opacity-0 transition-opacity",
+                                        pathname === `/conversations/${conversation._id}` &&
+                                            "opacity-100"
                                     )} />
 
                                     <DicebearAvatar
@@ -132,22 +140,22 @@ export const ConversationsPanel = () => {
                                             <span className="ml-auto shrink-0 text-muted-foreground text-xs">
                                                 {formatDistanceToNow(conversation._creationTime)}
                                             </span>
-                                            <div className="mt-1 flex items-center justify-between gap-2">
-                                                <div className="flex w-0 grow items-center gap-1">
-                                                    {isLastMessageFromOperator && (
-                                                        <CornerUpLeftIcon className="size-3 shrink-0 text-muted-foreground" />
+                                        </div>
+                                        <div className="mt-1 flex items-center justify-between gap-2">
+                                            <div className="flex w-0 grow items-center gap-1">
+                                                {isLastMessageFromOperator && (
+                                                    <CornerUpLeftIcon className="size-3 shrink-0 text-muted-foreground" />
+                                                )}
+                                                <span
+                                                    className={cn(
+                                                        "line-clamp-1 text-muted-foreground text-xs",
+                                                        !isLastMessageFromOperator && "font-bold text-black"
                                                     )}
-                                                    <span
-                                                        className={cn(
-                                                            "line-clamp-1 text-muted-foreground text-xs",
-                                                            !isLastMessageFromOperator && "font-bold text-black"
-                                                        )}
-                                                    >
-                                                        {conversation.lastMessage?.text}
-                                                    </span>
-                                                </div>
-                                                <ConversationStatusIcon status={conversation.status} />
+                                                >
+                                                    {conversation.lastMessage?.text}
+                                                </span>
                                             </div>
+                                            <ConversationStatusIcon status={conversation.status} />
                                         </div>
                                     </div>
                                 </Link>

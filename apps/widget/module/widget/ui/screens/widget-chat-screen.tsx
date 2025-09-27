@@ -1,9 +1,10 @@
-// "use client";
+"use client";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toUIMessages, useThreadMessages } from "@convex-dev/agent/react";
+import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { Button } from "@workspace/ui/components/button";
 import { WidgetHeader } from "../components/widget-header";
 import { ArrowLeftIcon, MenuIcon } from "lucide-react";
@@ -125,7 +126,13 @@ export const WidgetChatScreen = () => {
                                 <AIMessageContent>
                                     <AIResponse>{message.content}</AIResponse>
                                 </AIMessageContent>
-                                {/* TODO: Add Avatar component */}
+                                {message.role === "assistant" && (
+                                    <DicebearAvatar
+                                        imageUrl="/logo.svg"
+                                        seed="assistant"
+                                        size={32}
+                                    />
+                                )}
                             </AIMessage>
                         )
                     })}
