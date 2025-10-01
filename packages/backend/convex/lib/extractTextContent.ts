@@ -3,7 +3,6 @@ import { Id } from "../_generated/dataModel";
 import { StorageActionWriter } from "convex/server";
 import { assert } from "convex-helpers";
 import { generateText } from "ai";
-import { arrayBuffer } from "stream/consumers";
 
 const AI_MODELS = {
     image: openai.chat("gpt-4o-mini"),
