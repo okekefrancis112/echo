@@ -1,110 +1,183 @@
-import vault from 'node-vault';
+/**
+ * HashiCorp Vault client with namespace support for HCP
+ */
 
-export async function createSecretsManagerClient() {
-  const vaultClient = vault({
-    endpoint: process.env.HASHICORP_ADDRESS,
-  });
-
-  // Authenticate using AppRole
-  const login = await vaultClient.approleLogin({
-    role_id: process.env.HASHICORP_ROLE_ID,
-    secret_id: process.env.HASHICORP_SECRET_ACCESS_KEY,
-  });
-
-  // Set token for authenticated operations
-  vaultClient.token = login.auth.client_token;
-
-  console.log('✅ Authenticated to Vault as AppRole:', login.auth.policies);
-  return vaultClient;
+interface VaultAuthResponse {
+  auth: {
+    client_token: string;
+    policies: string[];
+    lease_duration: number;
+  };
 }
 
+interface VaultSecretResponse {
+  data: {
+    data: Record<string, any>;
+    metadata: {
+      created_time: string;
+      version: number;
+    };
+  };
+}
+
+/**
+ * Cache for Vault token
+ */
+let cachedToken: string | null = null;
+let tokenExpiry = 0;
+
+/**
+ * Get environment configuration safely
+ */
+const vaultEndpoint = process.env.HASHICORP_ADDRESS;
+const roleId = process.env.HASHICORP_ROLE_ID;
+const secretId = process.env.HASHICORP_ACCESS_KEY_ID;
+const kvMountPath = process.env.HASHICORP_KV_MOUNT || "tenant";
+const vaultNamespace = process.env.HASHICORP_NAMESPACE || "admin"; // 👈 Namespace support
+
+if (!vaultEndpoint || !roleId || !secretId) {
+  throw new Error("❌ Missing required Vault environment variables");
+}
+
+/**
+ * Authenticate with Vault using AppRole
+ */
+async function authenticateVault(): Promise<string> {
+  const now = Date.now();
+
+  // Return cached token if still valid (5-min buffer)
+  if (cachedToken && tokenExpiry - now > 5 * 60 * 1000) {
+    return cachedToken;
+  }
+
+  const response = await fetch(`${vaultEndpoint}/v1/auth/approle/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Vault-Namespace": vaultNamespace // 👈 Namespace header
+    },
+    body: JSON.stringify({
+      role_id: roleId,
+      secret_id: secretId,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Vault authentication failed: ${response.status} ${errorText}`);
+  }
+
+  const data: VaultAuthResponse = await response.json();
+  cachedToken = data.auth.client_token;
+  tokenExpiry = now + data.auth.lease_duration * 1000;
+
+  console.log("✅ Authenticated to Vault as AppRole:", data.auth.policies);
+  return cachedToken;
+}
+
+/**
+ * Fetch a secret from HashiCorp Vault (KV v2)
+ */
 export async function getSecretValue<T = Record<string, any>>(secretPath: string): Promise<T> {
-  try {
-    const vaultClient = await createSecretsManagerClient();
+  const token = await authenticateVault();
 
-    // Read secret (KV v2 engine)
-    const secret = await vaultClient.read(`secret/data/${secretPath}`);
+  const response = await fetch(`${vaultEndpoint}/v1/${kvMountPath}/data/${secretPath}`, {
+    method: "GET",
+    headers: {
+      "X-Vault-Token": token,
+      "X-Vault-Namespace": vaultNamespace // 👈 Namespace header
+    },
+  });
 
-    const data = secret.data?.data as T;
-    console.log(`🔑 Secret fetched from ${secretPath}:`, data);
-
-    return data;
-  } catch (error: any) {
-    console.error(`❌ Error reading secret at ${secretPath}:`, error.message);
-    throw error;
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to read secret at ${secretPath}: ${response.status} ${errorText}`);
   }
+
+  const data: VaultSecretResponse = await response.json();
+  console.log(`🔑 Secret fetched from ${kvMountPath}/${secretPath}`);
+  return data.data.data as T;
 }
 
-// export async function upsertSecret(secretPath: string, secretData: Record<string, unknown>): Promise<void> {
-//   try {
-//     const vaultClient = await createSecretsManagerClient();
-
-//     // Write secret (KV v2 engine)
-//     await vaultClient.write(`secret/data/${secretPath}`, { data: JSON.stringify(secretData) });
-
-//     console.log(`✅ Secret saved to ${secretPath}`);
-//   } catch (error: any) {
-//     if (error instanceof ResourceExistsException) {
-//         await vaultClient.write(`secret/data/${secretPath}`, { data: JSON.stringify(secretData) });
-//     }
-//     console.error(`❌ Error saving secret at ${secretPath}:`, error.message);
-//     throw error;
-//   }
-// }]
-
-
+/**
+ * Write or update a secret (overwrites existing data)
+ */
 export async function upsertSecret(secretPath: string, secretData: Record<string, any>): Promise<void> {
-  const vaultClient = await createSecretsManagerClient();
+  const token = await authenticateVault();
+
+  const response = await fetch(`${vaultEndpoint}/v1/${kvMountPath}/data/${secretPath}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Vault-Token": token,
+      "X-Vault-Namespace": vaultNamespace // 👈 Namespace header
+    },
+    body: JSON.stringify({ data: secretData }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to write secret at ${secretPath}: ${response.status} ${errorText}`);
+  }
+
+  console.log(`✅ Secret written successfully at ${kvMountPath}/${secretPath}`);
+}
+
+/**
+ * Delete a secret from Vault KV v2
+ */
+export async function deleteSecret(secretPath: string): Promise<void> {
+  const token = await authenticateVault();
+
+  const response = await fetch(`${vaultEndpoint}/v1/${kvMountPath}/data/${secretPath}`, {
+    method: "DELETE",
+    headers: {
+      "X-Vault-Token": token,
+      "X-Vault-Namespace": vaultNamespace // 👈 Namespace header
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to delete secret at ${secretPath}: ${response.status} ${errorText}`);
+  }
+
+  console.log(`🗑️ Secret deleted at ${kvMountPath}/${secretPath}`);
+}
+
+/**
+ * List secrets at a given path (discover keys)
+ */
+export async function listSecrets(path: string): Promise<string[]> {
+  const token = await authenticateVault();
+
+  const response = await fetch(`${vaultEndpoint}/v1/${kvMountPath}/metadata/${path}?list=true`, {
+    method: "GET",
+    headers: {
+      "X-Vault-Token": token,
+      "X-Vault-Namespace": vaultNamespace // 👈 Namespace header
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to list secrets at ${path}: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.data.keys || [];
+}
+
+/**
+ * Parse AWS-style SecretString into JSON (optional helper)
+ */
+export function parseSecretString<T = Record<string, unknown>>(secret: any): T | null {
+  if (!secret?.SecretString) return null;
 
   try {
-    // Try writing the secret (KV v2 engine)
-    // await vaultClient.write(`secret/data/${secretPath}`, { data: secretData });
-    await vaultClient.write(`secret/data/${secretPath}`, { data: JSON.stringify(secretData) });
-    console.log(`✅ Secret created or updated at ${secretPath}`);
-  } catch (error: any) {
-    // Handle "already exists" or similar conflict errors
-    if (
-      error.response?.statusCode === 400 ||
-      error.response?.statusCode === 409 ||
-      /already exists/i.test(error.message)
-    ) {
-      console.warn(`⚠️ Secret already exists at ${secretPath}, attempting update...`);
-
-      try {
-        // Fetch the existing secret
-        const existing = await vaultClient.read(`secret/data/${secretPath}`);
-        const existingData = existing.data?.data || {};
-
-        // Merge old + new fields (preserving existing keys)
-        const updatedData = { ...existingData, ...secretData };
-
-        // Write merged data back
-        // await vaultClient.write(`secret/data/${secretPath}`, { data: updatedData });
-        await vaultClient.write(`secret/data/${secretPath}`, { data: JSON.stringify(updatedData) });
-        console.log(`✅ Secret updated successfully at ${secretPath}`);
-      } catch (updateErr: any) {
-        console.error(`❌ Failed to update secret at ${secretPath}:`, updateErr.message);
-        throw updateErr;
-      }
-    } else {
-      console.error(`❌ Error saving secret at ${secretPath}:`, error.message);
-      throw error;
-    }
+    return JSON.parse(secret.SecretString) as T;
+  } catch (error) {
+    console.error("❌ Error parsing secret string:", error);
+    return null;
   }
 }
-
-export function parseSecretString<T = Record<string, unknown>>(
-    secret: any
-): T | null {
-    if (!secret.SecretString) {
-        return null;
-    }
-
-    try {
-        return JSON.parse(secret.SecretString) as T;
-    } catch (error) {
-        console.error(`❌ Error parsing secret string:`, error);
-        return null;
-    }
-}
-

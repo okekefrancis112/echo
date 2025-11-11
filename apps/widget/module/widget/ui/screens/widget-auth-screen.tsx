@@ -60,7 +60,6 @@ export const WidgetAuthScreen = () => {
             metadata,
         })
 
-        console.log("Created contact session with ID:", contactSessionId);
         setContactSessionId(contactSessionId)
         setScreen("selection");
     }
