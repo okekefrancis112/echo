@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Vapi from "@vapi-ai/web";
+import { useAtomValue } from "jotai";
+import { vapiSecretsAtom, widgetSettingsAtom } from "../atoms/widget-atoms";
 
 interface TranscriptMessage {
   role: "user" | "assistant";
@@ -14,15 +16,23 @@ interface VapiMessage {
 }
 
 export const useVapi = () => {
-  const vapiRef = useRef<Vapi | null>(null);
+  const vapiSecrets = useAtomValue(vapiSecretsAtom);
+  const widgetSettings = useAtomValue(widgetSettingsAtom);
+
+  // const vapiRef = useRef<Vapi | null>(null);
+  const [vapi, setVapi] = useState<Vapi | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptMessage[]>([]);
 
   useEffect(() => {
-    const vapiInstance = new Vapi("");
-    vapiRef.current = vapiInstance;
+    if (!vapiSecrets) {
+      return;
+    }
+
+    const vapiInstance = new Vapi(vapiSecrets.publicApiKey);
+    setVapi(vapiInstance);
 
     vapiInstance.on("call-start", () => {
       setIsConnected(true);
@@ -45,7 +55,7 @@ export const useVapi = () => {
     });
 
     vapiInstance.on("error", (error) => {
-      console.error("VAPI_ERROR:", error);
+      console.error(error, "VAPI_ERROR:");
       setIsConnecting(false);
     });
 
@@ -59,33 +69,32 @@ export const useVapi = () => {
           ...prev,
           {
             role: message.role === "user" ? "user" : "assistant",
-            text: message.transcript ?? "", // Default to empty string
+            text: message.transcript ?? "",
           },
         ]);
       }
     });
 
     return () => {
-      vapiInstance.stop();
-      vapiRef.current = null;
+      vapiInstance?.stop();
     };
   }, []);
 
   const startCall = () => {
-    if (vapiRef.current) {
-      setIsConnecting(true);
-      vapiRef.current.start("");
-    } else {
-      console.error("Cannot start call: Vapi instance not initialized");
-      setIsConnecting(false);
+    if (!vapiSecrets || !widgetSettings?.vapiSettings?.assistantId) {
+      return
+    }
+
+    setIsConnecting(true);
+
+    if (vapi) {
+      vapi.start(widgetSettings.vapiSettings.assistantId);
     }
   };
 
   const endCall = () => {
-    if (vapiRef.current) {
-      vapiRef.current.stop();
-    } else {
-      console.warn("No Vapi instance to stop");
+    if (vapi) {
+      vapi.stop();
     }
   };
 
