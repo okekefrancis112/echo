@@ -56,7 +56,6 @@ export const CustomizationForm = ({
                     values.vapiSettings.phoneNumber === "none"
                         ? ""
                         : values.vapiSettings.phoneNumber,
-                         : values.vapiSettings.phoneNumber,
             };
 
             await upsertWidgetSettings({
