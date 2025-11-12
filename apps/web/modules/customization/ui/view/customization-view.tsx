@@ -15,7 +15,7 @@ export const CustomizationView = () => {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center gap-y-2 bg-muted p-8">
                 <Loader2Icon className="text-muted-foreground animate-spin" />
-                <p className="text-muted-foreground test-sm">Loading settings...</p>
+                <p className="text-muted-foreground text-sm">Loading settings...</p>
             </div>
         );
     }
