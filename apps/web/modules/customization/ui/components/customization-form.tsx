@@ -67,7 +67,7 @@ export const CustomizationForm = ({
             toast.success("Widget settings saved");
         } catch (error) {
             console.error(error);
-            toast.error("Something went wrong")
+            toast.error("Something went wrong");
         }
     };
 
