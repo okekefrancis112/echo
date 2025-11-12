@@ -167,17 +167,3 @@ export async function listSecrets(path: string): Promise<string[]> {
   const data = await response.json();
   return data.data.keys || [];
 }
-
-/**
- * Parse AWS-style SecretString into JSON (optional helper)
- */
-export function parseSecretString<T = Record<string, unknown>>(secret: any): T | null {
-  if (!secret?.SecretString) return null;
-
-  try {
-    return JSON.parse(secret.SecretString) as T;
-  } catch (error) {
-    console.error("❌ Error parsing secret string:", error);
-    return null;
-  }
-}

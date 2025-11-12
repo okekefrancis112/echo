@@ -1,13 +1,14 @@
 import { ConvexError } from "convex/values";
 import { action } from "../_generated/server";
 import { internal } from "../_generated/api";
-import { getSecretValue, parseSecretString } from "../lib/secrets";
+import { getSecretValue } from "../lib/secrets";
 import { VapiClient, Vapi } from "@vapi-ai/server-sdk";
 
 export const getAssistants = action({
     args: {},
     handler: async (ctx): Promise<Vapi.Assistant[]> => {
         const identity = await ctx.auth.getUserIdentity();
+
         if (!identity) {
             throw new ConvexError({
                 code: "UNAUTHORIZED",
@@ -16,6 +17,7 @@ export const getAssistants = action({
         }
 
         const orgId = identity.orgId as string;
+        
         if (!orgId) {
             throw new ConvexError({
                 code: "UNAUTHORIZED",
