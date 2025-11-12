@@ -132,10 +132,9 @@ export const WidgetChatScreen = () => {
                         ref={topElementRef}
                     />
                     {toUIMessages(messages.results ?? []).map((message) =>{
-                        // Extract text content from parts array
-                        const textContent = message.parts
-                            ?.filter(part => part.type === 'text')
-                            .map(part => part.text)
+                        const textContent = (message.parts as Array<{ type?: string; text?: string }> | undefined)
+                            ?.filter((part) => part.type === 'text')
+                            .map((part) => part.text ?? '')
                             .join('') || '';
                         return (
                             <AIMessage
@@ -143,7 +142,6 @@ export const WidgetChatScreen = () => {
                                 key={message.id}
                             >
                                 <AIMessageContent>
-                                    {/* <AIResponse>{message.content}</AIResponse> */}
                                     <AIResponse>{textContent}</AIResponse>
                                 </AIMessageContent>
                                 {message.role === "assistant" && (
