@@ -9,7 +9,6 @@ import { api } from "@workspace/backend/_generated/api"
 import { Doc } from "@workspace/backend/_generated/dataModel"
 import { contactSessionIdAtomFamily, organizationIdAtom, screenAtom } from "../../atoms/widget-atoms"
 import { useAtomValue, useSetAtom } from "jotai"
-import { set } from "zod/v4-mini"
 
 const formSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),

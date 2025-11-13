@@ -1,28 +1,13 @@
 "use client";
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toUIMessages, useThreadMessages } from "@convex-dev/agent/react";
-import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { Button } from "@workspace/ui/components/button";
 import { WidgetHeader } from "../components/widget-header";
-import { ArrowLeftIcon, MenuIcon, MicIcon, MicOffIcon } from "lucide-react";
-import { useAtomValue, useSetAtom } from "jotai";
-import { contactSessionIdAtomFamily, conversationIdAtom, organizationIdAtom, screenAtom, widgetSettingsAtom } from "../../atoms/widget-atoms";
-import { useAction, useQuery } from "convex/react";
-import { api } from "@workspace/backend/_generated/api";
+import { ArrowLeftIcon, MicIcon, MicOffIcon } from "lucide-react";
+import { useSetAtom } from "jotai";
+import { screenAtom } from "../../atoms/widget-atoms";
 import { AIConversation, AIConversationContent, AIConversationScrollButton } from "@workspace/ui/components/ai/conversation";
 import { AIMessage, AIMessageContent } from "@workspace/ui/components/ai/message";
-import { AIResponse } from "@workspace/ui/components/ai/response";
-import { AISuggestion, AISuggestions } from "@workspace/ui/components/ai/suggestion";
-import { Form, FormField } from "@workspace/ui/components/form";
-import { AIInput, AIInputSubmit, AIInputTextarea, AIInputToolbar, AIInputTools } from "@workspace/ui/components/ai/input";
-import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
-import { InfiniteScrollTrigger } from "@workspace/ui/components/infinite-scroll-trigger";
-import { useMemo } from "react";
 import { useVapi } from "../../hooks/use-vapi";
-import { WidgetFooter } from "../components/widget-footer";
 import { cn } from "@workspace/ui/lib/utils";
 
 export const WidgetVoiceScreen = () => {
@@ -49,7 +34,7 @@ export const WidgetVoiceScreen = () => {
                 <p>Voice Chat</p>
             </WidgetHeader>
             {transcript.length > 0 ? (
-                <AIConversation className="h-full flex-1">
+                <AIConversation className="h-full">
                     <AIConversationContent>
                         {transcript.map((message, index) => (
                             <AIMessage
