@@ -218,7 +218,7 @@ export const ContactPanel = () => {
                                         <span>{section.title}</span>
                                     </div>
                                 </AccordionTrigger>
-                                <AccordionContent>
+                                <AccordionContent className="px-5 py-4">
                                     <div className="space-y-2 text-sm">
                                         {section.items.map((item) => (
                                             <div className="flex justify-between" key={`${section.id}-${item.label}`}>
