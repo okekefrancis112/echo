@@ -24,7 +24,19 @@ export const upsert = mutation({
             });
         }
 
-        // TODO: CHECK FOR SUBSCRIPTION
+        const subscription = await ctx.runQuery(
+            internal.system.subscriptions.getByOrganizationId,
+            {
+                organizationId: orgId,
+            },
+        );
+
+        if (subscription?.status !== "active") {
+            throw new ConvexError({
+                code: "BAD_REQUEST",
+                message: "Missing subscription",
+            });
+        }
 
         await ctx.scheduler.runAfter(0, internal.system.secrets.upsert, {
             service: args.service,
