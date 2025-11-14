@@ -55,7 +55,7 @@ export const IntegrationsView = () => {
                     </div>
                     <div className="mt-8 space-y-6">
                         <div className="flex items-center gap-4">
-                            <Label className="w-34" htmlFor="orgaization-id">
+                            <Label className="w-34" htmlFor="organization-id">
                                 Organization ID
                             </Label>
                             <Input
