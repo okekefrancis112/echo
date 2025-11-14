@@ -50,7 +50,7 @@ export const IntegrationsView = () => {
                     <div className="space-y-2">
                         <h1 className="text-2xl md:text-4xl">Setup & Integrations</h1>
                         <p className="text-muted-foreground">
-                            Choose the integrations that&apos;s right for you
+                            Choose the integration that&apos;s right for you
                         </p>
                     </div>
                     <div className="mt-8 space-y-6">
