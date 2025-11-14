@@ -18,7 +18,7 @@ http.route({
         const event = await validateRequest(request);
 
         if (!event) {
-            return new Response("Error occured", { status: 400 });
+            return new Response("Error occurred", { status: 400 });
         }
 
         switch (event.type) {
