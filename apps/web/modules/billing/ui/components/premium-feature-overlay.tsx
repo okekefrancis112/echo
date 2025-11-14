@@ -73,7 +73,7 @@ export const PremiumFeatureOverlay = ({
                         </div>
                         <CardTitle className="text-xl">Premium Feature</CardTitle>
                         <CardDescription>
-                            This feature required a Pro subscription
+                            This feature requires a Pro subscription
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
