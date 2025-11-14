@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
+import { internal } from "../_generated/api";
 
 export const upsert = mutation({
     args: {
@@ -45,6 +46,21 @@ export const upsert = mutation({
                 vapiSettings: args.vapiSettings,
             });
         } else {
+
+            const subscription = await ctx.runQuery(
+                internal.system.subscriptions.getByOrganizationId,
+                {
+                    organizationId: orgId,
+                },
+            );
+
+            if (subscription?.status !== "active") {
+                throw new ConvexError({
+                    code: "BAD_REQUEST",
+                    message: "Missing subscription",
+                });
+            }
+            
             await ctx.db.insert("widgetSettings", {
                 organizationId: orgId,
                 greetMessage: args.greetMessage,
