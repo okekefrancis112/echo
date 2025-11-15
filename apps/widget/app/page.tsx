@@ -8,7 +8,8 @@ interface Props {
     organizationId: string;
   }>
 }
-const Page =async  ({ searchParams }: Props) => {
+
+const Page = ({ searchParams }: Props) => {  // Remove 'async' here
   const { organizationId } = use(searchParams);
   return (
     <WidgetView organizationId={organizationId} />
